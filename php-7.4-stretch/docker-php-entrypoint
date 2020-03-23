@@ -1,0 +1,61 @@
+#!/bin/sh
+set -e
+
+cat > /etc/ssmtp/ssmtp.conf <<-EOCFG
+root=postmaster
+mailhub=${RELAY_HOST}
+hostname=${SERVER_NAME}
+FromLineOverride=YES
+EOCFG
+
+confDir=/usr/local/etc/php
+extDir="$(php -d 'display_errors=stderr' -r 'echo ini_get("extension_dir");')"
+
+if [ "true" = "$XDEBUG_ENABLED" ]; then
+    echo "zend_extension=${extDir}/xdebug.so" > ${confDir}/conf.d/docker-php-ext-xdebug.ini
+
+    if [ "" != "$XDEBUG_REMOTE_HOST" ]; then
+        sed -i "s/xdebug.remote_host=10.0.75.1/xdebug.remote_host=${XDEBUG_REMOTE_HOST}/" ${confDir}/conf.d/xdebug.ini
+    fi
+
+    if [ "" != "$XDEBUG_REMOTE_CONNECT_BACK" ]; then
+        sed -i "s/xdebug.remote_connect_back=0/xdebug.remote_connect_back=${XDEBUG_REMOTE_CONNECT_BACK}/" ${confDir}/conf.d/xdebug.ini
+    fi
+
+    if [ "" != "$XDEBUG_IDE_KEY" ]; then
+        sed -i "s/xdebug.idekey=PHPSTORM/xdebug.idekey=${XDEBUG_IDE_KEY}/" ${confDir}/conf.d/xdebug.ini
+    fi
+
+    XDEBUG_PORT=$(grep "xdebug.remote_port" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
+    echo "XDebug enabled. IDE Port: ${XDEBUG_PORT}"
+fi
+
+if [ "true" = "$OPCACHE_ENABLED" ]; then
+    echo "zend_extension=${extDir}/opcache.so" > ${confDir}/conf.d/docker-php-ext-opcache.ini
+    echo "ZendOpcache enabled"
+fi
+
+if [ "true" = "$INFORMIX_ENABLED" ]; then
+    sed -i "s/INFORMIX_USER/${INFORMIX_USER}/" /etc/odbc.ini
+    sed -i "s/INFORMIX_PASS/${INFORMIX_PASS}/" /etc/odbc.ini
+    sed -i "s/INFORMIX_DB/${INFORMIX_DB}/" /etc/odbc.ini
+    sed -i "s/INFORMIX_SERVER/${INFORMIX_SERVER}/" /etc/odbc.ini
+    sed -i "s/ODBC_NAME/${ODBC_NAME}/" /etc/odbc.ini
+    sed -i "s/INFORMIX_CLIENT_LOCALE/${INFORMIX_CLIENT_LOCALE}/" /etc/odbc.ini
+    sed -i "s/INFORMIX_LOCALE/${INFORMIX_LOCALE}/" /etc/odbc.ini
+
+    echo "${INFORMIX_SERVER} olsoctcp ${INFORMIX_HOST} ${INFORMIX_PORT}" > /opt/IBM/informix/etc/sqlhosts
+
+    echo "Informix config setup"
+fi
+
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+	set -- apache2-foreground "$@"
+elif [ "cli" = "$1" ]; then
+	cron
+	shift 1
+	set -- php "$@"
+fi
+
+exec "$@"
