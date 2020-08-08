@@ -41,7 +41,7 @@ RUN set -eux; \
         supervisor \
         python \
         iputils-ping \
-        unixodbc \
+        gosu \
 	; \
 	rm -rf /var/lib/apt/lists/*
 

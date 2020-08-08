@@ -37,11 +37,10 @@ fi
 
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
-	set -- apache2-foreground "$@"
+    set -- apache2-foreground "$@"
 elif [ "cli" = "$1" ]; then
-	cron
-	shift 1
-	set -- php "$@"
+    shift 1
+    set -- gosu www-data php "$@"
 fi
 
 exec "$@"
