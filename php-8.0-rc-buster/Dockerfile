@@ -1,6 +1,6 @@
 # Based on and tweaked from the official https://github.com/docker-library/php
 
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
 
@@ -35,7 +35,6 @@ RUN set -eux; \
         libssh2-1 \
         libmemcachedutil2 \
         libmcrypt4 \
-        ssmtp \
         cron \
         libzip4 \
         supervisor \
@@ -116,6 +115,9 @@ RUN { \
 	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
 	&& a2enconf docker-php
 
+ENV PHP_EXTRA_BUILD_DEPS apache2-dev
+ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2 --disable-cgi
+
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
 # Enable optimization (-O2)
@@ -125,13 +127,13 @@ RUN { \
 # -D_LARGEFILE_SOURCE and -D_FILE_OFFSET_BITS=64 (https://www.php.net/manual/en/intro.filesystem.php)
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
-ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
+ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312
+ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
 
-ENV PHP_VERSION 7.4.3
-ENV PHP_URL="https://www.php.net/get/php-7.4.3.tar.xz/from/this/mirror" PHP_ASC_URL="https://www.php.net/get/php-7.4.3.tar.xz.asc/from/this/mirror"
-ENV PHP_SHA256="cf1f856d877c268124ded1ede40c9fb6142b125fdaafdc54f855120b8bc6982a" PHP_MD5=""
+ENV PHP_VERSION 8.0.0beta1
+ENV PHP_URL="https://downloads.php.net/~carusogabriel/php-8.0.0beta1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~carusogabriel/php-8.0.0beta1.tar.xz.asc"
+ENV PHP_SHA256="d71592128156060501e4ba513a899a91bca25946e566f7ca34345ccd5945d072" PHP_MD5=""
 
 RUN set -eux; \
 	\
@@ -176,12 +178,13 @@ RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
         apache2-dev \
+		libargon2-dev \
 		libcurl4-openssl-dev \
 		libedit-dev \
 		libonig-dev \
 		libsodium-dev \
 		libsqlite3-dev \
-		libssl1.0-dev \
+		libssl-dev \
 		libxml2-dev \
 		zlib1g-dev \
         libicu-dev \
@@ -228,6 +231,7 @@ RUN set -eux; \
 		--enable-ftp \
 		--enable-mbstring \
 		--enable-mysqlnd \
+		--with-password-argon2 \
 		--with-sodium=shared \
 		--with-pdo-sqlite=/usr \
 		--with-sqlite3=/usr \
@@ -244,7 +248,6 @@ RUN set -eux; \
         --with-zip \
         --enable-soap \
         --enable-fileinfo \
-        --enable-json \
         --with-pdo-mysql \
         --with-xsl \
         --with-gmp \
@@ -307,7 +310,6 @@ ENTRYPOINT ["docker-php-entrypoint"]
 
 COPY apache2-foreground /usr/local/bin/
 COPY custom.ini /usr/local/etc/php/conf.d/custom.ini
-COPY mail.ini /usr/local/etc/php/conf.d/mail.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
