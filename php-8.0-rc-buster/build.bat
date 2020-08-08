@@ -1,10 +1,10 @@
 @ECHO OFF
 
-SET BASE_IMAGE_NAME=scottsmith/php:7.4-stretch
-SET DEVTOOLS_IMAGE_NAME=scottsmith/php:7.4-stretch-devtools
+SET BASE_IMAGE_NAME=scottsmith/php:8.0-rc-buster
+SET DEVTOOLS_IMAGE_NAME=scottsmith/php:8.0-rc-buster-devtools
 
-SET NODE_VERSION=13
-SET YARN_VERSION=1.22.4
+SET NODE_VERSION=12.18.3
+SET YARN_VERSION=latest
 
 ECHO Building docker image %BASE_IMAGE_NAME%
 docker build -t %BASE_IMAGE_NAME% .

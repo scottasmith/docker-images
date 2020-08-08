@@ -2,11 +2,11 @@
 
 set -e
 
-BASE_IMAGE_NAME=scottsmith/php:7.4-stretch
-DEVTOOLS_IMAGE_NAME=scottsmith/php:7.4-stretch-devtools
+BASE_IMAGE_NAME=scottsmith/php:8.0-rc-buster
+DEVTOOLS_IMAGE_NAME=scottsmith/php:8.0-rc-buster-devtools
 
-NODE_VERSION=13
-YARN_VERSION=1.22.4
+NODE_VERSION=12.18.3
+YARN_VERSION=latest
 
 echo "Building docker image ${BASE_IMAGE_NAME}"
 #
