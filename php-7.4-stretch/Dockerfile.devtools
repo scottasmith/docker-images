@@ -5,16 +5,14 @@ FROM $BASE_IMAGE_NAME
 LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
 
 ARG NODE_VERSION=10
-ARG YARN_VERSION=latest
 
 ENV NODE_VERSION $NODE_VERSION
-ENV YARN_VERSION $YARN_VERSION
 
 ENV COMPOSER_SHA384_URL="https://composer.github.io/installer.sha384sum"
 
-ENV COMPOSER_HOME=/root/.composer
+ENV COMPOSER_HOME=/php/.composer
 
-ENV NVM_DIR /root/.nvm
+ENV NVM_DIR /node/.nvm
 
 RUN set -eux; \
 	apt-get update; \
@@ -32,28 +30,15 @@ RUN set -eux; \
 
 RUN set -e; \
     mkdir -p $NVM_DIR && \
+    echo "" >> /etc/profile && \
+    echo 'export NVM_DIR="/node/.nvm"' >> /etc/profile && \
+    echo '. "$NVM_DIR/nvm.sh"  # This loads nvm' >> /etc/profile && \
     curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
-    echo "" >> ~/.bashrc && \
-    echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc && \
-    echo '. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc && \
-    ln -s `npm bin --global` /root/.node-bin && \
+    ln -s `npm bin --global` /node/.node-bin && \
     # Fix permission problem when working as root in Docker
     npm config set user 0 && \
     npm config set unsafe-perm true
 
 # Add PATH for node
-ENV PATH $PATH:/root/.node-bin
-
-RUN set -eux; \
-    if [ ${YARN_VERSION} = "latest" ]; then \
-        curl -o- -L https://yarnpkg.com/install.sh | bash; \
-    else \
-        curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}; \
-    fi && \
-    \
-    echo "" >> ~/.bashrc && \
-    echo 'export PATH="$HOME/.yarn/bin:$PATH"' >> ~/.bashrc
-
-# Add PATH for YARN
-ENV PATH $PATH:/.yarn/bin
+ENV PATH $PATH:/node/.node-bin

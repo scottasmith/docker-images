@@ -64,6 +64,10 @@ if [ "${1#-}" != "$1" ]; then
 elif [ "cli" = "$1" ]; then
     shift 1
     set -- gosu www-data php "$@"
+elif [ "sh" = "$1" ]; then
+    shift 1
+    set -- gosu www-data sh "$@"
 fi
+
 
 exec "$@"
