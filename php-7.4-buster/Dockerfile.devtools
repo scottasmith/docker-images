@@ -12,8 +12,6 @@ ENV YARN_VERSION $YARN_VERSION
 
 ENV COMPOSER_SHA384_URL="https://composer.github.io/installer.sha384sum"
 
-ENV COMPOSER_HOME=/root/.composer
-
 ENV NVM_DIR /root/.nvm
 
 RUN set -eux; \

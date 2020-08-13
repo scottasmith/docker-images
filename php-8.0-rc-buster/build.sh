@@ -30,11 +30,3 @@ docker build \
 #
 echo ----------
 echo Done
-
-echo Uploading to registry
-#
-docker push $BASE_IMAGE_NAME
-docker push $DEVTOOLS_IMAGE_NAME
-#
-echo ----------
-echo Done

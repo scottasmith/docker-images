@@ -15,9 +15,3 @@ ECHO Building docker image %DEVTOOLS_IMAGE_NAME%
 docker build -t %DEVTOOLS_IMAGE_NAME% -f Dockerfile.devtools --build-arg NODE_VERSION=%NODE_VERSION% --build-arg YARN_VERSION=%YARN_VERSION% --build-arg BASE_IMAGE_NAME=%BASE_IMAGE_NAME% .
 ECHO ----------
 ECHO Done
-
-ECHO Uploading to registry
-docker push %BASE_IMAGE_NAME%
-docker push %DEVTOOLS_IMAGE_NAME%
-ECHO ----------
-ECHO Done

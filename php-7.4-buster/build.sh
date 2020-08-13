@@ -2,8 +2,8 @@
 
 set -e
 
-BASE_IMAGE_NAME=scottsmith/php:7.4-stretch
-DEVTOOLS_IMAGE_NAME=scottsmith/php:7.4-stretch-devtools
+BASE_IMAGE_NAME=scottsmith/php:7.4-buster
+DEVTOOLS_IMAGE_NAME=scottsmith/php:7.4-buster-devtools
 
 NODE_VERSION=13
 YARN_VERSION=1.22.4

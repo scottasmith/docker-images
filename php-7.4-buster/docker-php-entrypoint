@@ -1,13 +1,6 @@
 #!/bin/sh
 set -e
 
-cat > /etc/ssmtp/ssmtp.conf <<-EOCFG
-root=postmaster
-mailhub=${RELAY_HOST}
-hostname=${SERVER_NAME}
-FromLineOverride=YES
-EOCFG
-
 confDir=/usr/local/etc/php
 extDir="$(php -d 'display_errors=stderr' -r 'echo ini_get("extension_dir");')"
 

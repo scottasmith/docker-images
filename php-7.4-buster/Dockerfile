@@ -115,9 +115,6 @@ RUN { \
 	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
 	&& a2enconf docker-php
 
-ENV PHP_EXTRA_BUILD_DEPS apache2-dev
-ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2 --disable-cgi
-
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
 # Enable optimization (-O2)
@@ -127,13 +124,13 @@ ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2 --disable-cgi
 # -D_LARGEFILE_SOURCE and -D_FILE_OFFSET_BITS=64 (https://www.php.net/manual/en/intro.filesystem.php)
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
-ENV PHP_LDFLAGS="-Wl,-O1 -pie"
+ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
-ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
+ENV GPG_KEYS 42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312
 
-ENV PHP_VERSION 8.0.0beta1
-ENV PHP_URL="https://downloads.php.net/~carusogabriel/php-8.0.0beta1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~carusogabriel/php-8.0.0beta1.tar.xz.asc"
-ENV PHP_SHA256="d71592128156060501e4ba513a899a91bca25946e566f7ca34345ccd5945d072" PHP_MD5=""
+ENV PHP_VERSION 7.4.9
+ENV PHP_URL="https://www.php.net/get/php-7.4.9.tar.xz/from/this/mirror" PHP_ASC_URL="https://www.php.net/get/php-7.4.9.tar.xz.asc/from/this/mirror"
+ENV PHP_SHA256="23733f4a608ad1bebdcecf0138ebc5fd57cf20d6e0915f98a9444c3f747dc57b" PHP_MD5=""
 
 RUN set -eux; \
 	\
@@ -178,7 +175,6 @@ RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
         apache2-dev \
-		libargon2-dev \
 		libcurl4-openssl-dev \
 		libedit-dev \
 		libonig-dev \
@@ -230,7 +226,6 @@ RUN set -eux; \
 		--enable-ftp \
 		--enable-mbstring \
 		--enable-mysqlnd \
-		--with-password-argon2 \
 		--with-sodium=shared \
 		--with-pdo-sqlite=/usr \
 		--with-sqlite3=/usr \
@@ -247,6 +242,7 @@ RUN set -eux; \
         --with-zip \
         --enable-soap \
         --enable-fileinfo \
+        --enable-json \
         --with-pdo-mysql \
         --with-xsl \
         --with-gmp \
@@ -261,23 +257,22 @@ RUN set -eux; \
 		--with-libdir="lib/$debMultiarch" \
 		--with-apxs2 \
 		--disable-cgi \
-	&& \
-	make -j "$(nproc)" && \
-	find -type f -name '*.a' -delete && \
-	make install && \
-	find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true && \
+	; \
+	make -j "$(nproc)"; \
+	find -type f -name '*.a' -delete; \
+	make install; \
+	find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; \
 	make clean; \
 	\
 	cp -v php.ini-* "$PHP_INI_DIR/"; \
 	\
-	pecl channel-update pecl.php.net && \
-    #not available in php8 yet
-	#pecl install ssh2-1.2 && \
-	#not available in php8 yet
-	#pecl install xdebug && \
+	pecl channel-update pecl.php.net; \
+    pecl install ssh2-1.2 && \
+    pecl install xdebug; \
     printf "\n" | pecl install --nodeps mcrypt-1.0.3 && \
     printf "\n" | pecl install redis-5.2.0 && \
     printf "\n" | pecl install memcached-3.1.5 && \
+	printf "\n" | pecl install mongodb && \
     \
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
     docker-php-ext-enable ssh2 mcrypt redis memcached sodium; \

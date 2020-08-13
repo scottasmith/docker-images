@@ -4,7 +4,7 @@ set -e
 confDir=/usr/local/etc/php
 extDir="$(php -d 'display_errors=stderr' -r 'echo ini_get("extension_dir");')"
 
-if [ "true" = "$XDEBUG_ENABLED" ]; then
+if [ -n "$XDEBUG_ENABLED" ]; then
     echo "zend_extension=${extDir}/xdebug.so" > ${confDir}/conf.d/docker-php-ext-xdebug.ini
 
     if [ "" != "$XDEBUG_REMOTE_HOST" ]; then
@@ -23,14 +23,27 @@ if [ "true" = "$XDEBUG_ENABLED" ]; then
     echo "XDebug enabled. IDE Port: ${XDEBUG_PORT}"
 fi
 
-if [ "true" = "$OPCACHE_ENABLED" ]; then
+if [ -n "$OPCACHE_ENABLED" ]; then
     echo "zend_extension=${extDir}/opcache.so" > ${confDir}/conf.d/docker-php-ext-opcache.ini
     echo "ZendOpcache enabled"
 fi
 
-if [ "" != "$UMASK" ]; then
-    echo "Setting umask to $UMASK"
-    umask $UMASK
+# Setup user for linux based development
+if [ "x" != "x${GID}" ]; then
+    groupmod -g $GID www-data
+
+    if [ "x" = "x${UID}" ]; then
+        usermod -g $GID www-data
+    fi
+    echo "Updated apache2 gid www-data to ${GID}"
+fi
+if [ "x" != "x${UID}" ]; then
+    if [ "x" != "x${GID}" ]; then
+        usermod -g $GID -u $UID www-data
+    else 
+        usermod -u $UID www-data
+    fi
+    echo "Updated apache2 uid www-data to ${UID}"
 fi
 
 # first arg is `-f` or `--some-option`
@@ -39,9 +52,9 @@ if [ "${1#-}" != "$1" ]; then
 elif [ "cli" = "$1" ]; then
     shift 1
     set -- gosu www-data php "$@"
-elif [ "bash" = "$1" ]; then
+elif [ "sh" = "$1" ]; then
     shift 1
-    set -- gosu www-data bash "$@"
+    set -- gosu www-data sh "$@"
 fi
 
 exec "$@"
