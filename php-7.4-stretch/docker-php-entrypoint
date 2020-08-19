@@ -66,7 +66,7 @@ elif [ "cli" = "$1" ]; then
     set -- gosu www-data php "$@"
 elif [ "sh" = "$1" ]; then
     shift 1
-    set -- gosu www-data sh "$@"
+    set -- gosu www-data bash "$@"
 fi
 
 
