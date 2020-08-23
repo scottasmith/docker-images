@@ -3,7 +3,7 @@
 SET BASE_IMAGE_NAME=scottsmith/php:7.4-buster
 SET DEVTOOLS_IMAGE_NAME=scottsmith/php:7.4-buster-devtools
 
-SET NODE_VERSION=13
+SET NODE_VERSION=v12.18.3
 
 ECHO Building docker image %BASE_IMAGE_NAME%
 docker build -t %BASE_IMAGE_NAME% .

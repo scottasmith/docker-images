@@ -306,7 +306,6 @@ ENTRYPOINT ["docker-php-entrypoint"]
 
 COPY apache2-foreground /usr/local/bin/
 COPY custom.ini /usr/local/etc/php/conf.d/custom.ini
-COPY mail.ini /usr/local/etc/php/conf.d/mail.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf

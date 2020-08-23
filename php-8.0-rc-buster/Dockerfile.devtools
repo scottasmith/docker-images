@@ -1,44 +1,47 @@
-ARG BASE_IMAGE_NAME=scottsmith/php:8.0-rc-buster
+ARG BASE_IMAGE_NAME=scottsmith/php:7.4-buster
 
 FROM $BASE_IMAGE_NAME
 
 LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
 
-ARG NODE_VERSION=10
+ARG NODE_VERSION=v12.18.3
+ARG NODE_DISTRO=
+
+ENV COMPOSER_SHA384_URL "https://composer.github.io/installer.sha384sum"
+ENV COMPOSER_DIR /home/.composer
 
 ENV NODE_VERSION $NODE_VERSION
-
-ENV COMPOSER_SHA384_URL="https://composer.github.io/installer.sha384sum"
-
-ENV COMPOSER_HOME=/php/.composer
-
-ENV NVM_DIR /node/.nvm
-
-RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends unzip; \
-	rm -rf /var/lib/apt/lists/*;
+ENV NODE_DISTRO linux-x64
+ENV NODE_SHA256_URL https://nodejs.org/dist/$NODE_VERSION/SHASUMS256.txt.asc
+ENV NPM_DIR /home/.npm
 
 RUN set -eux; \
     cd /usr/local/bin; \
-    curl -o composer-setup.php https://getcomposer.org/installer && \
+    curl -s -o composer-setup.php https://getcomposer.org/installer && \
     curl -s $COMPOSER_SHA384_URL | sha384sum -c - && \
     php composer-setup.php && \
     ln -s /usr/local/bin/composer.phar /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer && \
-    rm composer-setup.php
+    rm composer-setup.php && \
+    echo "" >> /home/.bashrc && \
+    echo "export COMPOSER_DIR=\"${COMPOSER_DIR}\"" >> /home/.bashrc
 
 RUN set -e; \
-    mkdir -p $NVM_DIR && \
-    echo "" >> /etc/profile && \
-    echo 'export NVM_DIR="/node/.nvm"' >> /etc/profile && \
-    echo '. "$NVM_DIR/nvm.sh"  # This loads nvm' >> /etc/profile && \
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash && \
-    . $NVM_DIR/nvm.sh && \
-    ln -s `npm bin --global` /node/.node-bin && \
+    mkdir -p /usr/local/lib/nodejs && \
+    echo "https://nodejs.org/dist/v12.18.3/node-$NODE_VERSION-$NODE_DISTRO.tar.xz" && \
+    curl -s https://nodejs.org/dist/v12.18.3/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f - && \
+    echo "" >> /home/.bashrc && \
+    echo "export NPM_DIR=\"${NPM_DIR}\"" >> /home/.bashrc && \
+    echo "export NODE_VERSION=\"${NODE_VERSION}\"" >> /home/.bashrc && \
+    echo "export NODE_DISTRO=\"${NODE_DISTRO}\"" >> /home/.bashrc
     # Fix permission problem when working as root in Docker
-    npm config set user 0 && \
-    npm config set unsafe-perm true
+    #npm config set user 0 && \
+    #npm config set unsafe-perm true
+
+# Update the www-data user so its home directory is not /var/www
+RUN set -e; \
+    usermod -d /home www-data; \
+    chown -R www-data:www-data /home;
 
 # Add PATH for node
-ENV PATH $PATH:/root/.node-bin
+ENV PATH $PATH:/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH

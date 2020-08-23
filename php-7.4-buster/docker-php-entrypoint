@@ -62,5 +62,4 @@ elif [ "sh" = "$1" ]; then
     set -- gosu www-data bash "$@"
 fi
 
-
 exec "$@"

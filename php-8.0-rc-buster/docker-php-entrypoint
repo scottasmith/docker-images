@@ -28,6 +28,11 @@ if [ -n "$OPCACHE_ENABLED" ]; then
     echo "ZendOpcache enabled"
 fi
 
+if [ -n "$MONGODB_ENABLED" ]; then
+    echo "extension=${extDir}/mongodb.so" > ${confDir}/conf.d/docker-php-ext-mongodb.ini
+    echo "MongoDB enabled"
+fi
+
 # Setup user for linux based development
 if [ "x" != "x${GID}" ]; then
     groupmod -g $GID www-data
@@ -54,7 +59,7 @@ elif [ "cli" = "$1" ]; then
     set -- gosu www-data php "$@"
 elif [ "sh" = "$1" ]; then
     shift 1
-    set -- gosu www-data sh "$@"
+    set -- gosu www-data bash "$@"
 fi
 
 exec "$@"

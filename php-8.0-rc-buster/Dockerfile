@@ -278,6 +278,7 @@ RUN set -eux; \
     printf "\n" | pecl install --nodeps mcrypt-1.0.3 && \
     printf "\n" | pecl install redis-5.2.0 && \
     printf "\n" | pecl install memcached-3.1.5 && \
+	printf "\n" | pecl install mongodb && \
     \
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
     docker-php-ext-enable ssh2 mcrypt redis memcached sodium; \
