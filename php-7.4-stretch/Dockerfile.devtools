@@ -44,4 +44,4 @@ RUN set -e; \
     chown -R www-data:www-data /home;
 
 # Add PATH for node
-ENV PATH $PATH:/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
+ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
