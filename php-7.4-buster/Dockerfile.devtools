@@ -28,8 +28,7 @@ RUN set -eux; \
 
 RUN set -e; \
     mkdir -p /usr/local/lib/nodejs && \
-    echo "https://nodejs.org/dist/v12.18.3/node-$NODE_VERSION-$NODE_DISTRO.tar.xz" && \
-    curl -s https://nodejs.org/dist/v12.18.3/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f - && \
+    curl -s https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f - && \
     echo "" >> /home/.bashrc && \
     echo "export NPM_DIR=\"${NPM_DIR}\"" >> /home/.bashrc && \
     echo "export NODE_VERSION=\"${NODE_VERSION}\"" >> /home/.bashrc && \

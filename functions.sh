@@ -10,7 +10,7 @@ function php74() {
             ;;
             p) DOCKER_OPTIONS="$DOCKER_OPTIONS -p$OPTARG"
             ;;
-            p) DOCKER_OPTIONS="$DOCKER_OPTIONS --network $OPTARG"
+            n) DOCKER_OPTIONS="$DOCKER_OPTIONS --network $OPTARG"
             ;;
             \?) echo "Invalid option -$OPTARG" >&2
             ;;

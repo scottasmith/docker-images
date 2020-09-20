@@ -3,7 +3,7 @@
 SET BASE_IMAGE_NAME=scottsmith/php:8.0-rc-buster
 SET DEVTOOLS_IMAGE_NAME=scottsmith/php:8.0-rc-buster-devtools
 
-SET NODE_VERSION=12.18.3
+SET NODE_VERSION=v12.18.3
 SET YARN_VERSION=latest
 
 ECHO Building docker image %BASE_IMAGE_NAME%

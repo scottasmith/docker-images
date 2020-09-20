@@ -5,7 +5,7 @@ set -e
 BASE_IMAGE_NAME=scottsmith/php:7.4-stretch
 DEVTOOLS_IMAGE_NAME=scottsmith/php:7.4-stretch-devtools
 
-NODE_VERSION=13
+NODE_VERSION=v12.18.3
 
 echo "Building docker image ${BASE_IMAGE_NAME}"
 #
