@@ -131,9 +131,9 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
 
-ENV PHP_VERSION 8.0.0beta1
-ENV PHP_URL="https://downloads.php.net/~pollita/php-8.0.0beta4.tar.xz" PHP_ASC_URL="https://downloads.php.net/~pollita/php-8.0.0beta4.tar.xz.asc"
-ENV PHP_SHA256="6059de918632600bef6b96c60f1b922856c1406976a346361897b76d494a0e4c" PHP_MD5=""
+ENV PHP_VERSION 8.0.0RC2
+ENV PHP_URL="https://downloads.php.net/~pollita/php-8.0.0RC2.tar.xz" PHP_ASC_URL="https://downloads.php.net/~pollita/php-8.0.0RC2.tar.xz.asc"
+ENV PHP_SHA256="" PHP_MD5=""
 
 RUN set -eux; \
 	\
@@ -281,14 +281,14 @@ RUN set -eux; \
 	printf "\n" | pecl install mongodb && \
     \
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
-    docker-php-ext-enable ssh2 mcrypt redis memcached sodium; \
+    docker-php-ext-enable ssh2 mcrypt redis memcached sodium && \
     \
-	cd /; \
-	docker-php-source delete; \
+	cd / && \
+	docker-php-source delete && \
 	\
 # reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-	apt-mark auto '.*' > /dev/null; \
-	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
+	apt-mark auto '.*' > /dev/null && \
+	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark && \
 	find /usr/local -type f -executable -exec ldd '{}' ';' \
 		| awk '/=>/ { print $(NF-1) }' \
 		| sort -u \
@@ -296,12 +296,12 @@ RUN set -eux; \
 		| cut -d: -f1 \
 		| sort -u \
 		| xargs -r apt-mark manual \
-	; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	&& \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
 	\
-	pecl update-channels; \
+	pecl update-channels && \
 	\
-	rm -rf /tmp/pear ~/.pearrc; \
+	rm -rf /tmp/pear ~/.pearrc && \
 # smoke test
 	php --version
 
