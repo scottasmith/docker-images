@@ -44,3 +44,8 @@ RUN set -e; \
 
 # Add PATH for node
 ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
+
+# Symlink the root cache directories to home
+RUN set -e; \
+    ln -s $COMPOSER_DIR /root/.composer \
+    ln -s $NPM_DIR /root/.npm
