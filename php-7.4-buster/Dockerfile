@@ -9,31 +9,31 @@ ENV HISTCONTROL=ignoreboth
 
 # prevent Debian's PHP packages from being installed
 RUN set -eux; \
-	{ \
-		echo 'Package: php*'; \
-		echo 'Pin: release *'; \
-		echo 'Pin-Priority: -1'; \
-	} > /etc/apt/preferences.d/no-debian-php;
+    { \
+        echo 'Package: php*'; \
+        echo 'Pin: release *'; \
+        echo 'Pin-Priority: -1'; \
+    } > /etc/apt/preferences.d/no-debian-php;
 
 # dependencies required for running "phpize"
 ENV PHPIZE_DEPS \
-		autoconf \
-		dpkg-dev \
-		file \
-		g++ \
-		gcc \
-		libc-dev \
-		make \
-		pkg-config \
-		re2c
+        autoconf \
+        dpkg-dev \
+        file \
+        g++ \
+        gcc \
+        libc-dev \
+        make \
+        pkg-config \
+        re2c
 
 # persistent / runtime deps
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
-		ca-certificates \
-		curl \
-		xz-utils \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        xz-utils \
         libgmp10 \
         libssh2-1 \
         libmemcachedutil2 \
@@ -44,57 +44,58 @@ RUN set -eux; \
         python \
         iputils-ping \
         gosu \
-	; \
-	rm -rf /var/lib/apt/lists/*
+        unzip \
+    ; \
+    rm -rf /var/lib/apt/lists/*
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
-	mkdir -p "$PHP_INI_DIR/conf.d"; \
+    mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
-	[ ! -d /var/www/public ]; \
-	mkdir -p /var/www/public; \
-	chown www-data:www-data /var/www/public; \
-	chmod 777 /var/www/public; \
-	rm -rf /var/www/html;
+    [ ! -d /var/www/public ]; \
+    mkdir -p /var/www/public; \
+    chown www-data:www-data /var/www/public; \
+    chmod 777 /var/www/public; \
+    rm -rf /var/www/html;
 
 ENV APACHE_CONFDIR /etc/apache2
 ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
 
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends apache2; \
-	rm -rf /var/lib/apt/lists/*; \
-	\
+    apt-get update; \
+    apt-get install -y --no-install-recommends apache2; \
+    rm -rf /var/lib/apt/lists/*; \
+    \
 # generically convert lines like
 #   export APACHE_RUN_USER=www-data
 # into
 #   : ${APACHE_RUN_USER:=www-data}
 #   export APACHE_RUN_USER
 # so that they can be overridden at runtime ("-e APACHE_RUN_USER=...")
-	sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS"; \
-	\
+    sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS"; \
+    \
 # setup directories and permissions
-	. "$APACHE_ENVVARS"; \
-	for dir in \
-		"$APACHE_LOCK_DIR" \
-		"$APACHE_RUN_DIR" \
-		"$APACHE_LOG_DIR" \
-	; do \
-		rm -rvf "$dir"; \
-		mkdir -p "$dir"; \
-		chown "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
+    . "$APACHE_ENVVARS"; \
+    for dir in \
+        "$APACHE_LOCK_DIR" \
+        "$APACHE_RUN_DIR" \
+        "$APACHE_LOG_DIR" \
+    ; do \
+        rm -rvf "$dir"; \
+        mkdir -p "$dir"; \
+        chown "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
-		chmod 777 "$dir"; \
-	done; \
-	\
+        chmod 777 "$dir"; \
+    done; \
+    \
 # delete the "index.html" that installing Apache drops in here
-	rm -rvf /var/www/html/*; \
-	\
+    rm -rvf /var/www/html/*; \
+    \
 # logs should go to stdout / stderr
-	ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log"; \
-	ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log"; \
-	ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"; \
-	chown -R --no-dereference "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$APACHE_LOG_DIR"
+    ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log"; \
+    ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log"; \
+    ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"; \
+    chown -R --no-dereference "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$APACHE_LOG_DIR"
 
 # Apache + PHP requires preforking Apache for best results
 RUN a2dismod mpm_event && a2enmod mpm_prefork
@@ -104,19 +105,19 @@ RUN a2enmod rewrite
 
 # PHP files should be handled by PHP, and should be preferred over any other file type
 RUN { \
-		echo '<FilesMatch \.php$>'; \
-		echo '\tSetHandler application/x-httpd-php'; \
-		echo '</FilesMatch>'; \
-		echo; \
-		echo 'DirectoryIndex disabled'; \
-		echo 'DirectoryIndex index.php index.html'; \
-		echo; \
-		echo '<Directory /var/www/>'; \
-		echo '\tOptions -Indexes'; \
-		echo '\tAllowOverride All'; \
-		echo '</Directory>'; \
-	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
-	&& a2enconf docker-php
+        echo '<FilesMatch \.php$>'; \
+        echo '\tSetHandler application/x-httpd-php'; \
+        echo '</FilesMatch>'; \
+        echo; \
+        echo 'DirectoryIndex disabled'; \
+        echo 'DirectoryIndex index.php index.html'; \
+        echo; \
+        echo '<Directory /var/www/>'; \
+        echo '\tOptions -Indexes'; \
+        echo '\tAllowOverride All'; \
+        echo '</Directory>'; \
+    } | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
+    && a2enconf docker-php
 
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
@@ -136,56 +137,56 @@ ENV PHP_URL="https://www.php.net/get/php-7.4.9.tar.xz/from/this/mirror" PHP_ASC_
 ENV PHP_SHA256="23733f4a608ad1bebdcecf0138ebc5fd57cf20d6e0915f98a9444c3f747dc57b" PHP_MD5=""
 
 RUN set -eux; \
-	\
-	savedAptMark="$(apt-mark showmanual)"; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends gnupg dirmngr; \
-	rm -rf /var/lib/apt/lists/*; \
-	\
-	mkdir -p /usr/src; \
-	cd /usr/src; \
-	\
-	curl -fsSL -o php.tar.xz "$PHP_URL"; \
-	\
-	if [ -n "$PHP_SHA256" ]; then \
-		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
-	fi; \
-	if [ -n "$PHP_MD5" ]; then \
-		echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
-	fi; \
-	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		echo "disable-ipv6" >> $GNUPGHOME/dirmngr.conf; \
-		for key in $GPG_KEYS; do \
-			gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		gpgconf --kill all; \
-		rm -rf "$GNUPGHOME"; \
-	fi; \
-	\
-	apt-mark auto '.*' > /dev/null; \
-	apt-mark manual $savedAptMark > /dev/null; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
+    \
+    savedAptMark="$(apt-mark showmanual)"; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends gnupg dirmngr; \
+    rm -rf /var/lib/apt/lists/*; \
+    \
+    mkdir -p /usr/src; \
+    cd /usr/src; \
+    \
+    curl -fsSL -o php.tar.xz "$PHP_URL"; \
+    \
+    if [ -n "$PHP_SHA256" ]; then \
+        echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
+    fi; \
+    if [ -n "$PHP_MD5" ]; then \
+        echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
+    fi; \
+    \
+    if [ -n "$PHP_ASC_URL" ]; then \
+        curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
+        export GNUPGHOME="$(mktemp -d)"; \
+        echo "disable-ipv6" >> $GNUPGHOME/dirmngr.conf; \
+        for key in $GPG_KEYS; do \
+            gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+        done; \
+        gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+        gpgconf --kill all; \
+        rm -rf "$GNUPGHOME"; \
+    fi; \
+    \
+    apt-mark auto '.*' > /dev/null; \
+    apt-mark manual $savedAptMark > /dev/null; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
 COPY docker-php-source docker-php-ext-* /usr/local/bin/
 
 RUN set -eux; \
     \
-	savedAptMark="$(apt-mark showmanual)"; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
+    savedAptMark="$(apt-mark showmanual)"; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
         apache2-dev \
-		libcurl4-openssl-dev \
-		libedit-dev \
-		libonig-dev \
-		libsodium-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-		zlib1g-dev \
+        libcurl4-openssl-dev \
+        libedit-dev \
+        libonig-dev \
+        libsodium-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libxml2-dev \
+        zlib1g-dev \
         libicu-dev \
         libxml2-dev \
         libfreetype6-dev \
@@ -198,46 +199,46 @@ RUN set -eux; \
         libxslt1-dev \
         libzip-dev \
         libldap2-dev \
-		${PHPIZE_DEPS:-} \
-		${PHP_EXTRA_BUILD_DEPS:-} \
-	; \
-	rm -rf /var/lib/apt/lists/*; \
-	\
-	export \
-		CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
-		LDFLAGS="$PHP_LDFLAGS" \
-	; \
+        ${PHPIZE_DEPS:-} \
+        ${PHP_EXTRA_BUILD_DEPS:-} \
+    ; \
+    rm -rf /var/lib/apt/lists/*; \
+    \
+    export \
+        CFLAGS="$PHP_CFLAGS" \
+        CPPFLAGS="$PHP_CPPFLAGS" \
+        LDFLAGS="$PHP_LDFLAGS" \
+    ; \
     \
     docker-php-source extract; \
     \
-	cd /usr/src/php; \
-	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
-	debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)"; \
+    cd /usr/src/php; \
+    gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
+    debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)"; \
 # https://bugs.php.net/bug.php?id=74125
-	if [ ! -d /usr/include/curl ]; then \
-		ln -sT "/usr/include/$debMultiarch/curl" /usr/local/include/curl; \
-	fi; \
-	./configure \
-		--build="$gnuArch" \
-		--with-config-file-path="$PHP_INI_DIR" \
-		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-		\
+    if [ ! -d /usr/include/curl ]; then \
+        ln -sT "/usr/include/$debMultiarch/curl" /usr/local/include/curl; \
+    fi; \
+    ./configure \
+        --build="$gnuArch" \
+        --with-config-file-path="$PHP_INI_DIR" \
+        --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
+        \
 # make sure invalid --configure-flags are fatal errors intead of just warnings
-		--enable-option-checking=fatal \
-		--with-mhash \
-		--enable-ftp \
-		--enable-mbstring \
-		--enable-mysqlnd \
-		--with-sodium=shared \
-		--with-pdo-sqlite=/usr \
-		--with-sqlite3=/usr \
-		--with-curl \
-		--with-pear \
-		--with-libedit \
-		--with-openssl \
-		--with-zlib \
-		--with-zip \
+        --enable-option-checking=fatal \
+        --with-mhash \
+        --enable-ftp \
+        --enable-mbstring \
+        --enable-mysqlnd \
+        --with-sodium=shared \
+        --with-pdo-sqlite=/usr \
+        --with-sqlite3=/usr \
+        --with-curl \
+        --with-pear \
+        --with-libedit \
+        --with-openssl \
+        --with-zlib \
+        --with-zip \
         --enable-intl \
         --enable-calendar \
         --enable-bcmath \
@@ -256,51 +257,51 @@ RUN set -eux; \
         --with-freetype \
         --enable-sockets \
         \
-		$(test "$gnuArch" = 's390x-linux-gnu' && echo '--without-pcre-jit') \
-		--with-libdir="lib/$debMultiarch" \
-		--with-apxs2 \
-		--disable-cgi \
-	; \
-	make -j "$(nproc)"; \
-	find -type f -name '*.a' -delete; \
-	make install; \
-	find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; \
-	make clean; \
-	\
-	cp -v php.ini-* "$PHP_INI_DIR/"; \
-	\
-	pecl channel-update pecl.php.net; \
+        $(test "$gnuArch" = 's390x-linux-gnu' && echo '--without-pcre-jit') \
+        --with-libdir="lib/$debMultiarch" \
+        --with-apxs2 \
+        --disable-cgi \
+    ; \
+    make -j "$(nproc)"; \
+    find -type f -name '*.a' -delete; \
+    make install; \
+    find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; \
+    make clean; \
+    \
+    cp -v php.ini-* "$PHP_INI_DIR/"; \
+    \
+    pecl channel-update pecl.php.net; \
     pecl install ssh2-1.2 && \
     pecl install xdebug; \
     printf "\n" | pecl install --nodeps mcrypt-1.0.3 && \
     printf "\n" | pecl install redis-5.2.0 && \
     printf "\n" | pecl install memcached-3.1.5 && \
-	printf "\n" | pecl install mongodb && \
+    printf "\n" | pecl install mongodb && \
     \
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
     docker-php-ext-enable ssh2 mcrypt redis memcached sodium; \
     \
-	cd /; \
-	docker-php-source delete; \
-	\
+    cd /; \
+    docker-php-source delete; \
+    \
 # reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-	apt-mark auto '.*' > /dev/null; \
-	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
-	find /usr/local -type f -executable -exec ldd '{}' ';' \
-		| awk '/=>/ { print $(NF-1) }' \
-		| sort -u \
-		| xargs -r dpkg-query --search \
-		| cut -d: -f1 \
-		| sort -u \
-		| xargs -r apt-mark manual \
-	; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
-	\
-	pecl update-channels; \
-	\
-	rm -rf /tmp/pear ~/.pearrc; \
+    apt-mark auto '.*' > /dev/null; \
+    [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
+    find /usr/local -type f -executable -exec ldd '{}' ';' \
+        | awk '/=>/ { print $(NF-1) }' \
+        | sort -u \
+        | xargs -r dpkg-query --search \
+        | cut -d: -f1 \
+        | sort -u \
+        | xargs -r apt-mark manual \
+    ; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    \
+    pecl update-channels; \
+    \
+    rm -rf /tmp/pear ~/.pearrc; \
 # smoke test
-	php --version
+    php --version
 
 COPY docker-php-entrypoint /usr/local/bin/
 
