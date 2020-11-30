@@ -45,6 +45,7 @@ RUN set -eux; \
         iputils-ping \
         gosu \
         unzip \
+        libpng-dev \
     ; \
     rm -rf /var/lib/apt/lists/*
 
@@ -191,7 +192,6 @@ RUN set -eux; \
         libxml2-dev \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
-        libpng-dev \
         libgmp-dev \
         libmemcached-dev \
         libmcrypt-dev \
