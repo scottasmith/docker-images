@@ -271,10 +271,11 @@ RUN set -eux; \
     cp -v php.ini-* "$PHP_INI_DIR/"; \
     \
     pecl channel-update pecl.php.net && \
-    #not available in php8 yet
+    #not available in php8.0 yet
     #pecl install ssh2-1.2 && \
     pecl install xdebug && \
-    printf "\n" | pecl install --nodeps mcrypt-1.0.3 && \
+	#not available in php8.0 yet
+    #printf "\n" | pecl install --nodeps mcrypt-1.0.3 && \
     printf "\n" | pecl install redis-5.2.0 && \
     printf "\n" | pecl install memcached-3.1.5 && \
     printf "\n" | pecl install mongodb && \
