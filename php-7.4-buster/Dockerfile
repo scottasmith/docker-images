@@ -316,6 +316,11 @@ COPY vhost.conf /etc/apache2/sites-available/000-default.conf
 RUN echo 'export PHP_IDE_CONFIG=${PHP_IDE_CONFIG}' >> /etc/environment && \
     echo ". /etc/environment" >> /etc/apache2/envvars
 
+# Update the www-data user so its home directory is not /var/www
+RUN set -e; \
+    usermod -d /home www-data; \
+    chown -R www-data:www-data /home;
+
 # https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
 STOPSIGNAL SIGWINCH
 

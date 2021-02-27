@@ -42,6 +42,7 @@ RUN set -eux; \
         iputils-ping \
         gosu \
         libpng-dev \
+        unzip \
     ; \
     rm -rf /var/lib/apt/lists/*
 

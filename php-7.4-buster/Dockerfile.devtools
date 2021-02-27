@@ -22,24 +22,19 @@ RUN set -eux; \
     php composer-setup.php && \
     ln -s /usr/local/bin/composer.phar /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer && \
-    rm composer-setup.php && \
-
-RUN set -e; \
-    mkdir -p /usr/local/lib/nodejs && \
-    curl -s https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f -
-
-# Update the www-data user so its home directory is not /var/www
-RUN set -e; \
-    usermod -d /home www-data; \
-    chown -R www-data:www-data /home;
-
-# Add PATH for node
-ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
+    rm composer-setup.php
 
 # Symlink the root cache directories to home
 RUN set -e; \
     rm -rf /root/.composer && ln -s $COMPOSER_DIR /root \
     ln -s $NPM_DIR /root
+
+RUN set -e; \
+    mkdir -p /usr/local/lib/nodejs && \
+    curl -s https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f -
+
+# Add PATH for node
+ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
 
 # Bash aliases
 RUN set -e; \
