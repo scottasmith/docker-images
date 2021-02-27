@@ -133,8 +133,8 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
 
 ENV PHP_VERSION 8.0.0RC2
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.0.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.0.tar.xz.asc"
-ENV PHP_SHA256="b5278b3eef584f0c075d15666da4e952fa3859ee509d6b0cc2ed13df13f65ebb" PHP_MD5=""
+ENV PHP_URL="https://www.php.net/distributions/php-8.0.2.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.2.tar.xz.asc"
+ENV PHP_SHA256="84dd6e36f48c3a71ff5dceba375c1f6b34b71d4fa9e06b720780127176468ccc" PHP_MD5=""
 
 RUN set -eux; \
     \
@@ -271,17 +271,14 @@ RUN set -eux; \
     cp -v php.ini-* "$PHP_INI_DIR/"; \
     \
     pecl channel-update pecl.php.net && \
-    #not available in php8.0 yet
-    #pecl install ssh2-1.2 && \
-    pecl install xdebug && \
-	#not available in php8.0 yet
-    #printf "\n" | pecl install --nodeps mcrypt-1.0.3 && \
+    pecl install xdebug-3.0.3 && \
+    printf "\n" | pecl install --nodeps mcrypt-1.0.4 && \
     printf "\n" | pecl install redis-5.2.0 && \
     printf "\n" | pecl install memcached-3.1.5 && \
     printf "\n" | pecl install mongodb && \
     \
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
-    docker-php-ext-enable ssh2 mcrypt redis memcached sodium && \
+    docker-php-ext-enable mcrypt sodium && \
     \
     cd / && \
     docker-php-source delete && \
@@ -317,6 +314,11 @@ COPY vhost.conf /etc/apache2/sites-available/000-default.conf
 
 RUN echo 'export PHP_IDE_CONFIG=${PHP_IDE_CONFIG}' >> /etc/environment && \
     echo ". /etc/environment" >> /etc/apache2/envvars
+
+# Update the www-data user so its home directory is not /var/www
+RUN set -e; \
+    usermod -d /home www-data; \
+    chown -R www-data:www-data /home;
 
 # https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
 STOPSIGNAL SIGWINCH

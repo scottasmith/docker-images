@@ -7,20 +7,25 @@ extDir="$(php -d 'display_errors=stderr' -r 'echo ini_get("extension_dir");')"
 if [ -n "$XDEBUG_ENABLED" ]; then
     echo "zend_extension=${extDir}/xdebug.so" > ${confDir}/conf.d/docker-php-ext-xdebug.ini
 
-    if [ "" != "$XDEBUG_REMOTE_HOST" ]; then
-        sed -i "s/xdebug.remote_host=10.0.75.1/xdebug.remote_host=${XDEBUG_REMOTE_HOST}/" ${confDir}/conf.d/xdebug.ini
+    if [ "" != "$XDEBUG_CLIENT_HOST" ]; then
+        sed -i "s/xdebug.client_host=host.docker.internal/xdebug.remote_host=${XDEBUG_REMOTE_HOST}/" ${confDir}/conf.d/xdebug.ini
     fi
 
-    if [ "" != "$XDEBUG_REMOTE_CONNECT_BACK" ]; then
-        sed -i "s/xdebug.remote_connect_back=0/xdebug.remote_connect_back=${XDEBUG_REMOTE_CONNECT_BACK}/" ${confDir}/conf.d/xdebug.ini
+    if [ "" != "$XDEBUG_REMOTE_PORT" ]; then
+        sed -i "s/xdebug.client_port=48000/xdebug.client_port=${XDEBUG_REMOTE_PORT}/" ${confDir}/conf.d/xdebug.ini
+    fi
+
+    if [ "" != "$XDEBUG_DISCOVER_CLIENT_HOST" ]; then
+        sed -i "s/xdebug.discover_client_host=0/xdebug.discover_client_host=${XDEBUG_DISCOVER_CLIENT_HOST}/" ${confDir}/conf.d/xdebug.ini
     fi
 
     if [ "" != "$XDEBUG_IDE_KEY" ]; then
         sed -i "s/xdebug.idekey=PHPSTORM/xdebug.idekey=${XDEBUG_IDE_KEY}/" ${confDir}/conf.d/xdebug.ini
     fi
 
-    XDEBUG_PORT=$(grep "xdebug.remote_port" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
-    echo "XDebug enabled. IDE Port: ${XDEBUG_PORT}"
+    XDEBUG_GREP_HOST=$(grep "xdebug.client_host=" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
+    XDEBUG_GREP_PORT=$(grep "xdebug.client_port" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
+    echo "XDebug enabled. Client: ${XDEBUG_GREP_HOST}:${XDEBUG_GREP_PORT}"
 fi
 
 if [ -n "$OPCACHE_ENABLED" ]; then
@@ -31,6 +36,16 @@ fi
 if [ -n "$MONGODB_ENABLED" ]; then
     echo "extension=${extDir}/mongodb.so" > ${confDir}/conf.d/docker-php-ext-mongodb.ini
     echo "MongoDB enabled"
+fi
+
+if [ -n "$REDIS_ENABLED" ]; then
+    echo "extension=${extDir}/redis.so" > ${confDir}/conf.d/docker-php-ext-redis.ini
+    echo "Redis enabled"
+fi
+
+if [ -n "$MEMCACHED_ENABLED" ]; then
+    echo "extension=${extDir}/memcached.so" > ${confDir}/conf.d/docker-php-ext-memcached.ini
+    echo "Memcached enabled"
 fi
 
 # Setup user for linux based development
@@ -45,7 +60,7 @@ fi
 if [ "x" != "x${UID}" ]; then
     if [ "x" != "x${GID}" ]; then
         usermod -g $GID -u $UID www-data
-    else 
+    else
         usermod -u $UID www-data
     fi
     echo "Updated apache2 uid www-data to ${UID}"
@@ -57,7 +72,7 @@ if [ "${1#-}" != "$1" ]; then
 elif [ "cli" = "$1" ]; then
     shift 1
     set -- gosu www-data php "$@"
-elif [ "sh" = "$1" ]; then
+elif [ "bash" = "$1" ]; then
     shift 1
     set -- gosu www-data bash "$@"
 fi

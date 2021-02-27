@@ -4,7 +4,7 @@ FROM $BASE_IMAGE_NAME
 
 LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
 
-ARG NODE_VERSION=v12.18.3
+ARG NODE_VERSION=v15.10.0
 ARG NODE_DISTRO=
 
 ENV COMPOSER_SHA384_URL "https://composer.github.io/installer.sha384sum"
@@ -22,31 +22,21 @@ RUN set -eux; \
     php composer-setup.php && \
     ln -s /usr/local/bin/composer.phar /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer && \
-    rm composer-setup.php && \
-    echo "" >> /home/.bashrc && \
-    echo "export COMPOSER_DIR=\"${COMPOSER_DIR}\"" >> /home/.bashrc
-
-RUN set -e; \
-    mkdir -p /usr/local/lib/nodejs && \
-    curl -s https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f - && \
-    echo "" >> /home/.bashrc && \
-    echo "export NPM_DIR=\"${NPM_DIR}\"" >> /home/.bashrc && \
-    echo "export NODE_VERSION=\"${NODE_VERSION}\"" >> /home/.bashrc && \
-    echo "export NODE_DISTRO=\"${NODE_DISTRO}\"" >> /home/.bashrc
-    # Fix permission problem when working as root in Docker
-    #npm config set user 0 && \
-    #npm config set unsafe-perm true
-
-# Update the www-data user so its home directory is not /var/www
-RUN set -e; \
-    usermod -d /home www-data; \
-    chown -R www-data:www-data /home;
-
-# Add PATH for node
-ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
+    rm composer-setup.php
 
 # Symlink the root cache directories to home
 RUN set -e; \
     rm -rf /root/.composer && ln -s $COMPOSER_DIR /root \
     ln -s $NPM_DIR /root
+
+RUN set -e; \
+    mkdir -p /usr/local/lib/nodejs && \
+    curl -s https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f -
+
+# Add PATH for node
+ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
+
+# Bash aliases
+RUN set -e; \
+    echo "alias artisan='php artisan'" >> /home/.bashrc
 
