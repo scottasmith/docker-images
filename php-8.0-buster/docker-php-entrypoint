@@ -34,17 +34,17 @@ if [ -n "$OPCACHE_ENABLED" ]; then
 fi
 
 if [ -n "$MONGODB_ENABLED" ]; then
-    echo "extension=${extDir}/mongodb.so" > ${confDir}/conf.d/docker-php-ext-mongodb.ini
+    echo "extension=mongodb.so" > ${confDir}/conf.d/docker-php-ext-mongodb.ini
     echo "MongoDB enabled"
 fi
 
 if [ -n "$REDIS_ENABLED" ]; then
-    echo "extension=${extDir}/redis.so" > ${confDir}/conf.d/docker-php-ext-redis.ini
+    echo "extension=redis.so" > ${confDir}/conf.d/docker-php-ext-redis.ini
     echo "Redis enabled"
 fi
 
 if [ -n "$MEMCACHED_ENABLED" ]; then
-    echo "extension=${extDir}/memcached.so" > ${confDir}/conf.d/docker-php-ext-memcached.ini
+    echo "extension=memcached.so" > ${confDir}/conf.d/docker-php-ext-memcached.ini
     echo "Memcached enabled"
 fi
 
