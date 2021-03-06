@@ -267,14 +267,14 @@ RUN set -eux; \
     find -type f -name '*.a' -delete && \
     make install && \
     find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true && \
-    make clean; \
+    make clean && \
     \
-    cp -v php.ini-* "$PHP_INI_DIR/"; \
+    cp -v php.ini-* "$PHP_INI_DIR/" && \
     \
     pecl channel-update pecl.php.net && \
     pecl install xdebug-3.0.3 && \
     printf "\n" | pecl install --nodeps mcrypt-1.0.4 && \
-    printf "\n" | pecl install redis-5.2.0 && \
+    printf "\n" | pecl install redis-5.3.3 && \
     printf "\n" | pecl install memcached-3.1.5 && \
     printf "\n" | pecl install mongodb && \
     \
@@ -285,7 +285,7 @@ RUN set -eux; \
     docker-php-source delete && \
     \
 # reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-    apt-mark auto '.*' > /dev/null && \
+    apt-mark auto '.*' > /dev/null; \
     [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark && \
     find /usr/local -type f -executable -exec ldd '{}' ';' \
         | awk '/=>/ { print $(NF-1) }' \
