@@ -4,6 +4,9 @@ FROM debian:buster-slim
 
 LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
 
+# Sort out bash history ignorespace and ignoredups
+ENV HISTCONTROL=ignoreboth
+
 # prevent Debian's PHP packages from being installed
 RUN set -eux; \
     { \
