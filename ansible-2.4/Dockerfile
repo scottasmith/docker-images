@@ -6,6 +6,6 @@ RUN useradd -ms /bin/bash ansible
 
 USER ansible
 
-WORKDIR /home/ansible
+WORKDIR /ansible
 
 CMD ["/usr/local/bin/ansible"]
