@@ -1,0 +1,41 @@
+ARG BASE_IMAGE_NAME=scottsmith/php:8.0-buster
+
+FROM $BASE_IMAGE_NAME
+
+LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
+
+ARG NODE_VERSION=v15.10.0
+
+ENV COMPOSER_SHA384_URL "https://composer.github.io/installer.sha384sum"
+ENV COMPOSER_DIR /home/.composer
+
+ENV NODE_VERSION $NODE_VERSION
+ENV NODE_DISTRO linux-x64
+ENV NODE_SHA256_URL https://nodejs.org/dist/$NODE_VERSION/SHASUMS256.txt.asc
+ENV NPM_DIR /home/.npm
+
+RUN set -eux; \
+    cd /usr/local/bin; \
+    curl -s -o composer-setup.php https://getcomposer.org/installer && \
+    curl -s $COMPOSER_SHA384_URL | sha384sum -c - && \
+    php composer-setup.php && \
+    ln -s /usr/local/bin/composer.phar /usr/local/bin/composer && \
+    chmod +x /usr/local/bin/composer && \
+    rm composer-setup.php
+
+# Symlink the root cache directories to home
+RUN set -e; \
+    rm -rf /root/.composer && ln -s $COMPOSER_DIR /root \
+    ln -s $NPM_DIR /root
+
+RUN set -e; \
+    mkdir -p /usr/local/lib/nodejs && \
+    curl -s https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DISTRO.tar.xz | tar -xJv -C /usr/local/lib/nodejs -f -
+
+# Add PATH for node
+ENV PATH $PATH:/usr/local/lib/nodejs/node-$NODE_VERSION-$NODE_DISTRO/bin:$PATH
+
+# Bash aliases
+RUN set -e; \
+    echo "alias artisan='php artisan'" >> /home/.bashrc
+

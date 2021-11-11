@@ -1,6 +1,6 @@
 # Based on and tweaked from the official https://github.com/docker-library/php
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 LABEL maintainer="Scott Smith <smitherz82@gmail.com>"
 
@@ -34,10 +34,7 @@ RUN set -eux; \
         ca-certificates \
         curl \
         xz-utils \
-        libgmp10 \
-        libssh2-1 \
         libmemcachedutil2 \
-        libmcrypt4 \
         cron \
         libzip4 \
         supervisor \
@@ -46,6 +43,7 @@ RUN set -eux; \
         gosu \
         libpng-dev \
         unzip \
+        vim \
     ; \
     rm -rf /var/lib/apt/lists/*
 
@@ -137,8 +135,8 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
 
 ENV PHP_VERSION 8.0.0RC2
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.2.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.2.tar.xz.asc"
-ENV PHP_SHA256="84dd6e36f48c3a71ff5dceba375c1f6b34b71d4fa9e06b720780127176468ccc" PHP_MD5=""
+ENV PHP_URL="https://www.php.net/distributions/php-8.0.12.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.12.tar.xz.asc"
+ENV PHP_SHA256="a501017b3b0fd3023223ea25d98e87369b782f8a82310c4033d7ea6a989fea0a"
 
 RUN set -eux; \
     \
@@ -155,16 +153,12 @@ RUN set -eux; \
     if [ -n "$PHP_SHA256" ]; then \
         echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
     fi; \
-    if [ -n "$PHP_MD5" ]; then \
-        echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
-    fi; \
     \
     if [ -n "$PHP_ASC_URL" ]; then \
         curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
         export GNUPGHOME="$(mktemp -d)"; \
-        echo "disable-ipv6" >> $GNUPGHOME/dirmngr.conf; \
         for key in $GPG_KEYS; do \
-            gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+            gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
         done; \
         gpg --batch --verify php.tar.xz.asc php.tar.xz; \
         gpgconf --kill all; \
@@ -196,13 +190,9 @@ RUN set -eux; \
         libxml2-dev \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
-        libgmp-dev \
         libmemcached-dev \
-        libmcrypt-dev \
-        libssh2-1-dev \
         libxslt1-dev \
         libzip-dev \
-        libldap2-dev \
         ${PHPIZE_DEPS:-} \
         ${PHP_EXTRA_BUILD_DEPS:-} \
     ; \
@@ -234,6 +224,7 @@ RUN set -eux; \
         --enable-ftp \
         --enable-mbstring \
         --enable-mysqlnd \
+        --with-mysqli \
         --with-password-argon2 \
         --with-sodium=shared \
         --with-pdo-sqlite=/usr \
@@ -253,10 +244,8 @@ RUN set -eux; \
         --enable-fileinfo \
         --with-pdo-mysql \
         --with-xsl \
-        --with-gmp \
         --with-iconv \
         --enable-gd \
-        --with-ldap \
         --with-jpeg \
         --with-freetype \
         --enable-sockets \
@@ -276,7 +265,6 @@ RUN set -eux; \
     \
     pecl channel-update pecl.php.net && \
     pecl install xdebug-3.0.3 && \
-    printf "\n" | pecl install --nodeps mcrypt-1.0.4 && \
     printf "\n" | pecl install redis-5.3.3 && \
     printf "\n" | pecl install memcached-3.1.5 && \
     printf "\n" | pecl install mongodb && \

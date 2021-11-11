@@ -14,15 +14,15 @@ The devtools image allows to bind the following mountpoints for caching:
 
 eg.
 
-`docker run --rm -it -vcomposer-cache:/home/.composer -vnpm-cache:/home/.npm -v $(pwd):/var/www scottsmith/php:7.4-stretch-devtools`
+`docker run --rm -it -vcomposer-cache:/home/.composer -vnpm-cache:/home/.npm -v $(pwd):/var/www scottsmith/php:8.0-stretch-devtools`
 
 There are two entrypoints to override the default apache:
 
-`docker run --rm -it -vcomposer-cache:/home/.composer -vnpm-cache:/home/.npm -v $(pwd):/var/www scottsmith/php:7.4-stretch-devtools bash`
+`docker run --rm -it -vcomposer-cache:/home/.composer -vnpm-cache:/home/.npm -v $(pwd):/var/www scottsmith/php:8.0-stretch-devtools bash`
 
 for bash, and
 
-`docker run --rm -it -vcomposer-cache:/home/.composer -vnpm-cache:/home/.npm -v $(pwd):/var/www scottsmith/php:7.4-stretch-devtools php`
+`docker run --rm -it -vcomposer-cache:/home/.composer -vnpm-cache:/home/.npm -v $(pwd):/var/www scottsmith/php:8.0-stretch-devtools php`
 
 for php cli
 
