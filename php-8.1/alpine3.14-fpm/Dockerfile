@@ -61,11 +61,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
+ENV GPG_KEYS 39B641343D8C104B2B146DC3F9C39DC0B9698544 F1F692238FBC1666E5A5CCD4199F9DFEF6FFBAFD
 
-ENV PHP_VERSION 8.0.12
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.12.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.12.tar.xz.asc"
-ENV PHP_SHA256="a501017b3b0fd3023223ea25d98e87369b782f8a82310c4033d7ea6a989fea0a"
+ENV PHP_VERSION 8.1.0
+ENV PHP_URL="https://www.php.net/distributions/php-8.1.0.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.1.0.tar.xz.asc"
+ENV PHP_SHA256="a1317eff0723a2b3d3122bbfe107a1158570ea2822dc35a5fb360086db0f6bbc"
 
 RUN set -eux; \
     \
@@ -168,6 +168,12 @@ RUN set -eux; \
         --enable-sockets \
         \
         $(test "$gnuArch" = 's390x-linux-mus1' && echo '--without-pcre-jit') \
+        \
+        --disable-cgi \
+        \
+        --enable-fpm \
+        --with-fpm-user=www-data \
+        --with-fpm-group=www-data \
     && \
     make -j "$(nproc)" && \
     find -type f -name '*.a' -delete && \
@@ -210,8 +216,47 @@ RUN set -eux; \
 # smoke test
     php --version
 
+RUN set -eux; \
+	cd /usr/local/etc; \
+	if [ -d php-fpm.d ]; then \
+		# for some reason, upstream's php-fpm.conf.default has "include=NONE/etc/php-fpm.d/*.conf"
+		sed 's!=NONE/!=!g' php-fpm.conf.default | tee php-fpm.conf > /dev/null; \
+		cp php-fpm.d/www.conf.default php-fpm.d/www.conf; \
+	else \
+		# PHP 5.x doesn't use "include=" by default, so we'll create our own simple config that mimics PHP 7+ for consistency
+		mkdir php-fpm.d; \
+		cp php-fpm.conf.default php-fpm.d/www.conf; \
+		{ \
+			echo '[global]'; \
+			echo 'include=etc/php-fpm.d/*.conf'; \
+		} | tee php-fpm.conf; \
+	fi; \
+	{ \
+		echo '[global]'; \
+		echo 'error_log = /proc/self/fd/2'; \
+		echo; echo '; https://github.com/docker-library/php/pull/725#issuecomment-443540114'; echo 'log_limit = 8192'; \
+		echo; \
+		echo '[www]'; \
+		echo '; if we send this to /proc/self/fd/1, it never appears'; \
+		echo 'access.log = /proc/self/fd/2'; \
+		echo; \
+		echo 'clear_env = no'; \
+		echo; \
+		echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
+		echo 'catch_workers_output = yes'; \
+		echo 'decorate_workers_output = no'; \
+	} | tee php-fpm.d/docker.conf; \
+	{ \
+		echo '[global]'; \
+		echo 'daemonize = no'; \
+		echo; \
+		echo '[www]'; \
+		echo 'listen = 9000'; \
+	} | tee php-fpm.d/zz-docker.conf
+
 COPY custom.ini /usr/local/etc/php/conf.d/custom.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Update the www-data user so its home directory is not /var/www
 RUN set -e; \
@@ -223,4 +268,4 @@ COPY docker-php-entrypoint /usr/local/bin/
 ENTRYPOINT ["docker-php-entrypoint"]
 WORKDIR /var/www
 
-CMD ["php", "-a"]
+CMD ["php-fpm"]

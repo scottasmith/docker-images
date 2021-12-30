@@ -30,7 +30,8 @@ RUN set -eux; \
         libmemcached \
         libzip \
         openssl \
-        shadow
+        shadow \
+        su-exec
 
 # ensure www-data user exists
 RUN set -eux; \
@@ -61,11 +62,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
+ENV GPG_KEYS 39B641343D8C104B2B146DC3F9C39DC0B9698544 F1F692238FBC1666E5A5CCD4199F9DFEF6FFBAFD
 
-ENV PHP_VERSION 8.0.12
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.12.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.12.tar.xz.asc"
-ENV PHP_SHA256="a501017b3b0fd3023223ea25d98e87369b782f8a82310c4033d7ea6a989fea0a"
+ENV PHP_VERSION 8.1.0
+ENV PHP_URL="https://www.php.net/distributions/php-8.1.0.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.1.0.tar.xz.asc"
+ENV PHP_SHA256="a1317eff0723a2b3d3122bbfe107a1158570ea2822dc35a5fb360086db0f6bbc"
 
 RUN set -eux; \
     \
@@ -185,7 +186,7 @@ RUN set -eux; \
     cp -v php.ini-* "$PHP_INI_DIR/" && \
     \
     pecl channel-update pecl.php.net && \
-    pecl install xdebug-3.1.1 && \
+    pecl install xdebug-3.1.2 && \
     printf "\n" | pecl install redis-5.3.4 && \
     printf "\n" | pecl install memcached-3.1.5 && \
     printf "\n" | pecl install mongodb && \
