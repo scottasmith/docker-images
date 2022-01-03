@@ -1,3 +1,4 @@
+#!/bin/bash
 
 function guess_php_image_version() {
     local IMAGE_LINE=''
@@ -34,7 +35,7 @@ function guess_php_image_version() {
 function phpx() {
     local DOCKER_PHP_VERSION=''
     local DOCKER_OPTIONS=''
-    local DOCKER_NETWORKS=""
+    local DOCKER_NETWORKS=''
 
     DOCKER_PHP_VERSION=$(guess_php_image_version)
 
@@ -72,7 +73,7 @@ function phpx() {
 
 function php74() {
     local DOCKER_OPTIONS=''
-    local DOCKER_NETWORKS=""
+    local DOCKER_NETWORKS=''
 
     while getopts "xmrcn:p:" opt; do
         case $opt in
@@ -98,7 +99,7 @@ function php74() {
 
 function php80() {
     local DOCKER_OPTIONS=''
-    local DOCKER_NETWORKS=""
+    local DOCKER_NETWORKS=''
 
     while getopts "xmrcn:p:" opt; do
         case $opt in
@@ -124,7 +125,7 @@ function php80() {
 
 function php81() {
     local DOCKER_OPTIONS=''
-    local DOCKER_NETWORKS=""
+    local DOCKER_NETWORKS=''
 
     while getopts "xmrcn:p:" opt; do
         case $opt in
@@ -150,7 +151,7 @@ function php81() {
 
 function _start_php_container() {
     PHP_VERSION=$1
-    DOCKER_NETWORKS="$2,"
+    DOCKER_NETWORKS="web,$2,"
     DOCKER_OPTIONS="$3"
     IMAGE="scottsmith/php:${PHP_VERSION}"
     PWD=$(pwd)
@@ -175,12 +176,14 @@ function _start_php_container() {
 
     printf " \033[0;32m - instance ${CONTAINER_INSTANCE}\033[0m\n"
 
-    if [ "x${DOCKER_NETWORK}" != "x" ]; then
+    if [ "x${DOCKER_NETWORKS}" != "x" ]; then
         printf " \033[0;32m* Adding networks\033[0m\n"
-        while read -rd ',' DOCKER_NETWORK;
+        while IFS= read -r -d ',' DOCKER_NETWORK;
         do
-            docker network connect $DOCKER_NETWORK $CONTAINER_INSTANCE
-        done <<< "$DOCKER_NETWORKS"
+            if [ "x${DOCKER_NETWORK}" != "x" ]; then
+                docker network connect $DOCKER_NETWORK $CONTAINER_INSTANCE
+            fi
+        done < <(echo $DOCKER_NETWORKS)
     fi
 
     printf " \033[0;32m* Starting container\033[0m\n\n"
@@ -188,5 +191,24 @@ function _start_php_container() {
 
     docker start -ai $CONTAINER_INSTANCE
     docker stop $CONTAINER_INSTANCE > /dev/null 2>&1
+}
+
+function nodevuecli() {
+    IMAGE="scottsmith/node:16-vuecli"
+    PWD=$(pwd)
+
+    printf "\n\033[1;34mBinding directory to /var/www:\033[0m $PWD\n"
+    printf "\033[1;34mUsing Docker image:\033[0m $IMAGE\n\n"
+    printf " \033[0;32m* Creating container \033[0m"
+
+    docker run \
+      --rm \
+      -it \
+      -vnpm-cache:/home/.npm \
+      -v$PWD:/var/www \
+      -eUID=`id -u` \
+      -eGID=`id -g` \
+      $IMAGE \
+      bash
 }
 
