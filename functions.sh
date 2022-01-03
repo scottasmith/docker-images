@@ -205,7 +205,7 @@ function nodevuecli() {
       --rm \
       -it \
       -vnpm-cache:/home/.npm \
-      -v$PWD:/var/www \
+      -v$PWD:/project \
       -eUID=`id -u` \
       -eGID=`id -g` \
       $IMAGE \
