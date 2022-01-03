@@ -209,6 +209,6 @@ function nodevuecli() {
       -eUID=`id -u` \
       -eGID=`id -g` \
       $IMAGE \
-      bash
+      sh
 }
 
