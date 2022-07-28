@@ -247,6 +247,7 @@ RUN set -eux; \
         --with-iconv \
         --enable-gd \
         --with-jpeg \
+        --enable-exif \
         --with-freetype \
         --enable-sockets \
         \
