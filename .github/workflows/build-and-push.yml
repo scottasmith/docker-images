@@ -3,6 +3,9 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
+env:
+  FPM_ALPINE_VERSION: fpm-alpine2.15
+  PHP_VERSION: 8.1.9
 
 jobs:
   build_php_8_1_fpm:
@@ -24,10 +27,12 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
-        context: ./php-8.1/alpine3.14-fpm
-        file: ./php-8.1/alpine3.14-fpm/Dockerfile
+        build-args:
+          BASE_IMAGE: php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
+        context: ./php-8.1/${{ env.FPM_ALPINE_VERSION }}
+        file: ./php-8.1/${{ env.FPM_ALPINE_VERSION }}/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-alpine3.14-fpm
-        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-alpine3.14-fpm-buildcache
-        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-alpine3.14-fpm-buildcache,mode=max
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}
+        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}
+        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }},mode=max
