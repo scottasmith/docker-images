@@ -19,7 +19,7 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     
     - name: Setup dockerx
-      uses: docker/setup-dockerx-action@v1
+      uses: docker/setup-buildx-action@v1
       
     - name: Build and push
       uses: docker/build-push-action@v2
