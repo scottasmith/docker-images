@@ -1,0 +1,33 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_php_8_1_fpm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Login o DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+    
+    - name: Setup dockerx
+      uses: docker/setup-dockerx-action@v1
+      
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: ./php-8.1/alpine3.14-fpm
+        file: ./php-8.1/alpine3.14-fpm/Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        push: true
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-alpine3.14-fpm
+        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-alpine3.14-fpm-buildcache
+        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-alpine3.14-fpm-buildcache,mode=max
