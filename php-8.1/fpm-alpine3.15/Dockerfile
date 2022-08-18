@@ -76,6 +76,8 @@ RUN set -eux; \
     \
     docker-php-source delete
 
+RUN apk --no-cache add shadow
+
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY php.ini "$PHP_INI_DIR/php.ini"
