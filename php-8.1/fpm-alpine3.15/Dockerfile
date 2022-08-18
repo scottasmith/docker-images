@@ -65,8 +65,6 @@ RUN set -eux; \
     pecl install -o -f redis && docker-php-ext-enable redis && \
     # install pecl xdebug
     pecl install xdebug && \
-    # install pecl mongodb
-    pecl install mongodb && \
     # cleanup
     rm -rf /tmp/pear ~/.pearrc && \
     \
