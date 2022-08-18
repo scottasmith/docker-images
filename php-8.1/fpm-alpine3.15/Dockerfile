@@ -16,6 +16,7 @@ RUN set -eux; \
         libpq \
         nginx \
         supervisor \
+        shadow \
     && \
     \
     # temporary packages
@@ -75,8 +76,6 @@ RUN set -eux; \
     ln -s /var/cache/apk /etc/apk/cache && \
     \
     docker-php-source delete
-
-RUN apk --no-cache add shadow
 
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
