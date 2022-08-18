@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# WARNING: this is old and will NOT work at the minute
+#
+
 function guess_php_image_version() {
     local IMAGE_LINE=''
     local DOCKER_PHP_VERSION=''
@@ -192,23 +196,3 @@ function _start_php_container() {
     docker start -ai $CONTAINER_INSTANCE
     docker stop $CONTAINER_INSTANCE > /dev/null 2>&1
 }
-
-function nodevuecli() {
-    IMAGE="scottsmith/node:16-vuecli"
-    PWD=$(pwd)
-
-    printf "\n\033[1;34mBinding directory to /var/www:\033[0m $PWD\n"
-    printf "\033[1;34mUsing Docker image:\033[0m $IMAGE\n\n"
-    printf " \033[0;32m* Creating container \033[0m"
-
-    docker run \
-      --rm \
-      -it \
-      -vnpm-cache:/home/.npm \
-      -v$PWD:/project \
-      -eUID=`id -u` \
-      -eGID=`id -g` \
-      $IMAGE \
-      sh
-}
-

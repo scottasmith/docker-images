@@ -33,5 +33,3 @@ jobs:
         builder: ${{ steps.buildx.outputs.name }}
         push: true
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}
-        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}
-        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }},mode=max
