@@ -72,11 +72,15 @@ RUN set -eux; \
     # cleanup apk
     \
     apk del --no-network .build-deps && \
+    ln -s /var/cache/apk /etc/apk/cache && \
     \
     docker-php-source delete
 
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY php.ini "$PHP_INI_DIR/php.ini"
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf.default
 
 COPY docker-php-helpers /usr/local/bin/
