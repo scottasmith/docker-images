@@ -8,45 +8,58 @@ extDir="$(php -d 'display_errors=stderr' -r 'echo ini_get("extension_dir");')"
 # Enable XDebug
 # 
 # Parameters:
-#  1 - xdebug client host
-#  2 - xdebug ide key
-#
+#  xdebug ide key (optional, default PHPSTORM)
+#  xdebug_client_host (optional, default host.docker.internal)
+##
 function enable_xdebug() {
-    local XDEBUG_CLIENT_HOST=${1}
-    local XDEBUG_IDE_KEY=${2}
+    local xdebug_ide_key=${1:-""}
+    local xdebug_client_host=${2:-""}
 
     echo "zend_extension=${extDir}/xdebug.so" > ${confDir}/conf.d/docker-php-ext-xdebug.ini
 
-    if [ "" != "$XDEBUG_CLIENT_HOST" ]; then
-        sed -i "s/xdebug.client_host=host.docker.internal/xdebug.client_host=${XDEBUG_CLIENT_HOST}/" ${confDir}/conf.d/xdebug.ini
+    if [ "" != "$xdebug_ide_key" ]; then
+        sed -i "s/xdebug.idekey=PHPSTORM/xdebug.idekey=${xdebug_ide_key}/" ${confDir}/conf.d/xdebug.ini
     fi
 
-    if [ "" != "$XDEBUG_IDE_KEY" ]; then
-        sed -i "s/xdebug.idekey=PHPSTORM/xdebug.idekey=${XDEBUG_IDE_KEY}/" ${confDir}/conf.d/xdebug.ini
+    if [ "" != "$xdebug_client_host" ]; then
+        sed -i "s/xdebug.client_host=host.docker.internal/xdebug.client_host=${xdebug_client_host}/" ${confDir}/conf.d/xdebug.ini
     fi
 
-    XDEBUG_GREP_HOST=$(grep "xdebug.client_host=" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
-    XDEBUG_GREP_PORT=$(grep "xdebug.client_port" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
-    echo "XDebug enabled. Client: ${XDEBUG_GREP_HOST}:${XDEBUG_GREP_PORT}"
+    xdebug_grep_host=$(grep "xdebug.client_host=" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
+    xdebug_grep_port=$(grep "xdebug.client_port" ${confDir}/conf.d/xdebug.ini | awk -F= '{ print $2 }')
+    echo "XDebug enabled. Client: ${xdebug_grep_host}:${xdebug_grep_port}"
 }
 
+##
+# Enable Opcache
+#
 function enable_opcache() {
     echo "zend_extension=${extDir}/opcache.so" > ${confDir}/conf.d/docker-php-ext-opcache.ini
     echo "ZendOpcache enabled"
 }
 
+##
+# Enable MongoDB
+#
 function enable_mongodb() {
     echo "extension=mongodb.so" > ${confDir}/conf.d/docker-php-ext-mongodb.ini
     echo "MongoDB enabled"
 }
 
+##
+# Set www-data user
+# 
+# Parameters:
+#  uid
+#  gid (optional)
+##
 function set_wwwdata_user() {
-    local UID=${1}
-    local GID=${1:-""}
+    local uid=${1}
+    local gid=${2:-""}
 
-    usermod -u $UID www-data
+    usermod -u $uid www-data
 
-    if [ "x" != "x${GID}" ]; then
-        usermod -g $GID -u $UID www-data
+    if [ "x" != "x${gid}" ]; then
+        usermod -g $gid -u $gid www-data
     fi
 }
