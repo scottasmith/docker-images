@@ -58,7 +58,7 @@ RUN set -eux; \
     \
     # we don't want opcache on all the time in case we use xdebug
     # this version of docker-php-ext-install enables it by default
-    rm /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+    rm /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     \
     docker-php-ext-configure exif --enable-exif && \
     \
