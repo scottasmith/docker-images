@@ -1,11 +1,11 @@
-name: Docker Image CI
+name: PHP 8.2 Alpine 3.16 CI
 
 on:
   push:
     branches: [ "main" ]
 env:
   FPM_ALPINE_VERSION: fpm-alpine3.15
-  PHP_VERSION: 8.1.9
+  PHP_VERSION: 8.1
 
 jobs:
   build_php_8_1_fpm:
@@ -28,10 +28,10 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         build-args: BASE_IMAGE=php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
-        context: ./php-8.1/${{ env.FPM_ALPINE_VERSION }}
-        file: ./php-8.1/${{ env.FPM_ALPINE_VERSION }}/Dockerfile
+        context: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}
+        file: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}
-        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}-bcache
-        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:8.1-${{ env.FPM_ALPINE_VERSION }}-bcache,mode=max
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
+        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}-bcache
+        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}-bcache,mode=max
