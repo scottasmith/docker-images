@@ -8,7 +8,7 @@ env:
   PHP_VERSION: 8.1
 
 jobs:
-  build_php_8_1_fpm:
+  build_php_fpm:
     runs-on: ubuntu-latest
 
     steps:

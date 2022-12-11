@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=8.2-fpm-alpine3.16
+ARG BASE_IMAGE=php:8.2-fpm-alpine3.16
 
 FROM $BASE_IMAGE
 
@@ -34,6 +34,7 @@ RUN set -eux; \
         libwebp-dev \
         freetype-dev \
         icu-dev \
+        linux-headers \
     && \
     \
     # install PHP Extensions

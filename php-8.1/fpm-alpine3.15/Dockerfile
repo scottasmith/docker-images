@@ -34,6 +34,7 @@ RUN set -eux; \
         libwebp-dev \
         freetype-dev \
         icu-dev \
+        linux-headers \
     && \
     \
     # install PHP Extensions
