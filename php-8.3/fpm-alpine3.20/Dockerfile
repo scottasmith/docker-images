@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=php:8.1.9-fpm-alpine3.15
+ARG BASE_IMAGE=php:8.3-fpm-alpine3.20
 
 FROM $BASE_IMAGE
 
