@@ -43,4 +43,4 @@ jobs:
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
         cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}-bcache
         cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}-bcache,mode=max
-        platforms: linux/arm64,linux/amd64
+        platforms: linux/amd64
