@@ -10,7 +10,7 @@ concurrency:
 
 env:
   FPM_ALPINE_VERSION: fpm-alpine3.20
-  PHP_VERSION: 8.4.0RC4
+  PHP_VERSION: 8.4
 
 jobs:
   build_php_fpm:
@@ -35,7 +35,7 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
-        build-args: BASE_IMAGE=php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
+        #build-args: BASE_IMAGE=php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
         context: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}
         file: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
