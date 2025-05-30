@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=php:8.4.0-fpm-alpine3.20
+ARG BASE_IMAGE=php:8.4-fpm-alpine3.20
 
 FROM $BASE_IMAGE
 
@@ -70,7 +70,7 @@ RUN set -eux; \
     pecl install -o -f redis && docker-php-ext-enable redis && \
     # install pecl xdebug \
     # Not currently working with PHP 8.4
-    #pecl install xdebug && \
+    pecl install xdebug && \
     # cleanup
     rm -rf /tmp/pear ~/.pearrc && \
     \
