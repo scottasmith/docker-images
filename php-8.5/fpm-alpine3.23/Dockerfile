@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=php:8.3-fpm-alpine3.20
+ARG BASE_IMAGE=php:8.5-fpm-alpine3.23
 
 FROM $BASE_IMAGE
 
@@ -46,20 +46,14 @@ RUN set -eux; \
         pdo_pgsql \
         pgsql \
         pdo_mysql \
-        mysqli \
         curl \
         xml \
         pcntl \
-        opcache \
         exif \
         soap \
         zip \
         intl \
     && \
-    \
-    # we don't want opcache on all the time in case we use xdebug
-    # this version of docker-php-ext-install enables it by default
-    rm /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     \
     docker-php-ext-configure exif --enable-exif && \
     \
@@ -68,7 +62,7 @@ RUN set -eux; \
     \
     # install pecl redis and enable
     pecl install -o -f redis && docker-php-ext-enable redis && \
-    # install pecl xdebug
+    # install pecl xdebug \
     pecl install xdebug && \
     # cleanup
     rm -rf /tmp/pear ~/.pearrc && \
@@ -85,6 +79,6 @@ COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY php.ini "$PHP_INI_DIR/php.ini"
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf
-COPY www.conf /usr/local/etc/php-fpm.d/www.conf.default
+RUN rm /usr/local/etc/php-fpm.d/www.conf.default
 
 COPY docker-php-helpers /usr/local/bin/

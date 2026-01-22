@@ -1,16 +1,16 @@
-name: PHP 8.3 Alpine 3.20 CI
+name: PHP 8.5 Alpine 3.20 CI
 
 on:
   push:
     branches: [ "main" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-php83
+  group: ${{ github.workflow }}-${{ github.ref }}-php84
   cancel-in-progress: true
 
 env:
-  FPM_ALPINE_VERSION: fpm-alpine3.20
-  PHP_VERSION: 8.3
+  FPM_ALPINE_VERSION: fpm-alpine3.23
+  PHP_VERSION: 8.5
 
 jobs:
   build_php_fpm:
@@ -35,7 +35,7 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
-        build-args: BASE_IMAGE=php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
+        #build-args: BASE_IMAGE=php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
         context: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}
         file: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
