@@ -42,12 +42,8 @@ RUN set -eux; \
     \
     docker-php-ext-install -j $(nproc) \
         gd \
-        pdo \
         pdo_pgsql \
-        pgsql \
         pdo_mysql \
-        curl \
-        xml \
         pcntl \
         exif \
         soap \
