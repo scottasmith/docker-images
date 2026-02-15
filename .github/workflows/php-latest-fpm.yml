@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FPM_ALPINE_VERSION: fpm-alpine3.23
+  FPM_VERSION: fpm-debian-trixie
   PHP_VERSION: 8.5
 
 jobs:
@@ -36,11 +36,11 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         #build-args: BASE_IMAGE=php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
-        context: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}
-        file: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_ALPINE_VERSION }}/Dockerfile
+        context: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_VERSION }}
+        file: ./php-${{ env.PHP_VERSION }}/${{ env.FPM_VERSION }}/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_VERSION }}
         #cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}-bcache
         #cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/php:${{ env.PHP_VERSION }}-${{ env.FPM_ALPINE_VERSION }}-bcache,mode=max
         platforms: linux/amd64,linux/arm64

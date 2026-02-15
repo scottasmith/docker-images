@@ -53,6 +53,7 @@ RUN apt update && \
       intl \
       bcmath \
       ftp \
+      sockets \
     \
     && \
     \
