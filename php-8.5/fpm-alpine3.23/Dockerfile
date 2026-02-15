@@ -77,4 +77,9 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf
 RUN rm /usr/local/etc/php-fpm.d/www.conf.default
 
+# Temp storage for fastcgi buffer files
+RUN mkdir -p /tmp/nginx/client_body \
+    /tmp/nginx/fastcgi \
+    && chown -R www-data:www-data /tmp/nginx
+
 COPY docker-php-helpers /usr/local/bin/
