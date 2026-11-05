@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=php:8.5.3-fpm-trixie
+ARG BASE_IMAGE=php:8.5.12-fpm-trixie
 
 FROM $BASE_IMAGE
 

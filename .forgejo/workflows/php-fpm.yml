@@ -1,0 +1,38 @@
+name: PHP 8.5 Debian trixie
+
+# Runs on the Forgejo runner
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: 10.10.10.5:5000   # plain-HTTP registry; the runner's Docker trusts it
+  FPM_VERSION: fpm-debian-trixie
+  PHP_VERSION: "8.5"
+
+jobs:
+  build_php_fpm:
+    runs-on: debian           # on the ci-runner container itself, which has Docker
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Build
+      run: |
+        TAG="${PHP_VERSION}-${FPM_VERSION}"
+        docker build \
+          -t "${REGISTRY}/php:${TAG}" \
+          -t "${REGISTRY}/php:${TAG}-${GITHUB_SHA::12}" \
+          "./php-${PHP_VERSION}/${FPM_VERSION}"
+
+    - name: Push
+      run: |
+        TAG="${PHP_VERSION}-${FPM_VERSION}"
+        docker push "${REGISTRY}/php:${TAG}"
+        docker push "${REGISTRY}/php:${TAG}-${GITHUB_SHA::12}"
