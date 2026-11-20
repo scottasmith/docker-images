@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=php:8.5.12-fpm-trixie
+ARG BASE_IMAGE=php:8.5.13-fpm-trixie
 
 FROM $BASE_IMAGE
 
@@ -61,18 +61,9 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/* && \
     docker-php-source delete
 
-# install redis and xdebug
+COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 RUN set -eux; \
-    pecl channel-update pecl.php.net && \
-    # \
-    # install pecl redis and enable \
-    pecl install -o -f redis && \
-    # \
-    pecl install xdebug && \
-    # \
-    rm -rf /tmp/pear ~/.pearrc && \
-    # \
-    docker-php-ext-enable redis
+    pie install phpredis/phpredis
 
 # install composer
 RUN curl -sS https://getcomposer.org/installer | php -- \

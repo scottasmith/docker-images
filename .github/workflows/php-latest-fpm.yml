@@ -1,20 +1,26 @@
-name: PHP 8.5 Alpine 3.20 CI
+name: PHP FPM Debian trixie CI
 
 on:
   push:
     branches: [ "main" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-php84
+  group: ${{ github.workflow }}-${{ github.ref }}-php
   cancel-in-progress: true
 
 env:
   FPM_VERSION: fpm-debian-trixie
-  PHP_VERSION: 8.5
 
 jobs:
   build_php_fpm:
+    name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false        # one version failing shouldn't cancel the other
+      matrix:
+        php: [ "8.5", "8.6" ]
+    env:
+      PHP_VERSION: ${{ matrix.php }}
 
     steps:
     - name: Checkout
